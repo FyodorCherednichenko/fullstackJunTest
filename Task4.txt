@@ -1,0 +1,15 @@
+1) Составьте список пользователей users, которые осуществили хотя бы один заказ orders в интернет магазине.
+SELECT * FROM users WHERE users.id IN (SELECT user_id FROM orders);
+
+2) Выведите список товаров products и разделов catalogs, который соответствует товару.
+SELECT * FROM shop.catalogs JOIN shop.products ON catalogs.id = products.catalog_id;
+
+3) В базе данных shop и sample присутствуют одни и те же таблицы. Переместите запись id = 1 из таблицы shop.users в таблицу sample.users. Используйте транзакции.
+start transaction;
+	insert INTO sample.users (`name`,birthday_at,created_at,updated_at) select `name`,birthday_at,created_at,updated_at from shop.users where id=1;
+commit;
+
+4)Выведите одного случайного пользователя из таблицы shop.users, старше 30 лет, сделавшего минимум 3 заказа за последние полгода
+SELECT * FROM users
+WHERE datediff(NOW(),date_format(birthday_at, '%Y-%m-%d'))/365 > 30
+AND id = (SELECT user_id FROM shop.orders where updated_at >= subdate(NOW(), interval 6 month) group by user_id having count(user_id) >= 3 order by RAND() limit 1);
