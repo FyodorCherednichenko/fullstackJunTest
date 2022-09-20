@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row mx-auto my-3 text-center" style="border: 1px solid red;">
+            <div class="col-xl-12">
+                <h1>Олимпиада</h1>
+            </div>
+        </div>
+        <div class="row text-center mx-auto">
+            <div class="col-xl-12">
+                <label for="members">Участники</label>
+                <input id=members type="text" placeholder="введите имена участников через запятую">
+            </div>
+            <div class="col-12">
+                <input type="button" class="btn btn-primary" value="Добавить" id='add'>
+            </div>
+        </div>
+    </div>
+    <div class="row mx-auto text-center">
+        <div class="col col-xl-6 col-lg-7 col-md-8 col-sm-12 mx-auto">
+            <table class="table" id="table" style="visibility: hidden;">
+                <thead>
+                    <tr>
+                        <th onclick="sort('id_order', 0)" style="cursor:pointer">id</th>
+                        <th onclick="sort('name_order', 1)" style="cursor:pointer">Name</th>
+                        <th onclick="sort('score_order', 2)" style="cursor:pointer">Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <input type="hidden" id="name_order" value="asc">
+            <input type="hidden" id="score_order" value="asc">
+            <input type="hidden" id="id_order" value="asc">
+        </div>
+    </div>    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+
+    <script>
+        let id = 1
+        let html = '<tr><td>%id%</td><td>%name%</td><td>%score%</td></tr>'
+
+        $(document).keypress(function (e) {
+            if (e.which == 13) {
+                show_if_hide();
+                add_member();
+            }
+        });
+        $('#add').on('click', function () {
+            show_if_hide();
+            add_member();
+        });
+
+        function add_member() {
+            let pattern = /^[а-я,]+$/ig;
+
+            if (!pattern.test($('#members').val())) {
+                alert('member names contain invalid characters');
+                return false;
+            }
+
+            let names = $('#members').val().split(',');
+
+            for (let i = 0; i < names.length; i++) {
+                if (names[i] != '') {
+                    let replacements = {
+                        id: id,
+                        name: names[i],
+                        score: Math.round(Math.random() * 100),
+                    }
+                    $('#table tbody').append(replaceHtml(html, replacements))
+                    id++
+                }
+            }
+        }
+
+
+        function sort(direction_id, column) {
+            let table_data = [];
+            let elem = $('#table tbody tr')
+            
+            elem.each(function (){
+                table_data.push(this.innerText.split("\t"))
+            })
+
+            sort_direction = sort_order(direction_id)
+
+            if (sort_direction == 'asc') {
+                elem.remove()
+                ascBubleSort(table_data, column).forEach(function (element) {
+                    let replacements = {
+                        id: element[0],
+                        name: element[1],
+                        score: element[2],
+                    }
+                    $('#table tbody').append(replaceHtml(html, replacements))
+                })
+            } else if (sort_direction == 'desc') {
+                elem.remove()
+                descBubleSort(table_data, column).forEach(function (element) {
+                    let replacements = {
+                        id: element[0],
+                        name: element[1],
+                        score: element[2],
+                    }
+                    $('#table tbody').append(replaceHtml(html, replacements))
+                })
+            }            
+        }
+
+        function ascBubleSort(data, column) {
+            for (j = 0; j < data.length; j++) {
+                for (i = 0; i < data.length; i++) {
+                    if (data[j][column] < data[i][column]) {
+                        min = data[i]
+                        data[i] = data[j]
+                        data[j] = min
+                    }
+                }
+            }
+
+            return data  
+        }
+
+        function descBubleSort(data, column) {
+            for (j = 0; j < data.length; j++) {
+                for (i = 0; i < data.length; i++) {
+                    if (data[j][column] > data[i][column]) {
+                        min = data[i]
+                        data[i] = data[j]
+                        data[j] = min
+                    }
+                }
+            }
+
+            return data  
+        }
+
+        
+        function sort_order(id)
+        {
+
+            if ($('#' + id).val() == 'asc') {
+                $('#' + id).val('desc')
+            } else {
+                $('#' + id).val('asc')
+            }
+        
+            return $('#' + id).val()
+        }
+
+        function show_if_hide() {
+            if ($(".table").css('visibility') == 'hidden') {
+                $(".table ").css('visibility', 'visible')
+            }
+        } 
+        
+        function replaceHtmlWithoutEscaping(html, replacements) {
+            for(let key in replacements) {
+                let regex = new RegExp('%' + key + '%', 'g');
+                html = html.replace(regex, replacements[key])
+            }
+
+            return html;
+        }
+
+        function replaceHtml(html, replacements) {
+            for(let key in replacements) {
+                replacements[key] = escape(replacements[key]);
+            }
+
+            return replaceHtmlWithoutEscaping(html, replacements);
+        }
+
+        function escape(str) {
+            return (str ?? '').toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+    </script>
